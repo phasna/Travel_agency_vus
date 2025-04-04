@@ -1,330 +1,313 @@
 <template>
-  <div class="bg-gray-50">
-    <div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-3xl mx-auto">
-        <h1 class="text-3xl font-extrabold text-gray-900">Réserver votre voyage</h1>
-        <p class="mt-4 text-lg text-gray-500">
-          Remplissez le formulaire ci-dessous pour finaliser votre réservation.
-        </p>
+  <div class="booking-page">
+    <!-- Hero Section -->
+    <div
+      class="hero-section"
+      :style="{
+        backgroundImage: `url(${currentDestination?.image || '/images/default-hero.jpg'})`,
+      }"
+    >
+      <div class="hero-overlay">
+        <div class="container mx-auto px-4 py-16">
+          <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+            Réserver votre voyage à {{ currentDestination?.name }}
+          </h1>
+          <p class="text-xl text-white opacity-90">
+            {{ currentDestination?.description }}
+          </p>
+        </div>
+      </div>
+    </div>
 
-        <form @submit.prevent="handleSubmit" class="mt-12 space-y-8">
-          <!-- Informations personnelles -->
-          <div class="bg-white shadow sm:rounded-lg">
-            <div class="px-4 py-5 sm:p-6">
-              <h3 class="text-lg leading-6 font-medium text-gray-900">Informations personnelles</h3>
-              <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                <div class="sm:col-span-3">
-                  <label for="first-name" class="block text-sm font-medium text-gray-700"
-                    >Prénom</label
-                  >
-                  <div class="mt-1">
-                    <input
-                      type="text"
-                      id="first-name"
-                      v-model="form.firstName"
-                      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      :class="{ 'border-red-300': errors.firstName }"
-                    />
-                  </div>
-                  <p v-if="errors.firstName" class="mt-2 text-sm text-red-600">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="container mx-auto px-4 py-8">
+      <div class="flex justify-center items-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="error" class="container mx-auto px-4 py-8">
+      <div
+        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+        role="alert"
+      >
+        <strong class="font-bold">Erreur!</strong>
+        <span class="block sm:inline">{{ error }}</span>
+      </div>
+    </div>
+
+    <!-- Booking Form -->
+    <div v-else class="container mx-auto px-4 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Form Section -->
+        <div class="lg:col-span-2">
+          <form @submit.prevent="handleSubmit" class="space-y-6">
+            <!-- Personal Information -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+              <h2 class="text-2xl font-semibold mb-4">Informations personnelles</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+                  <input
+                    v-model="form.firstName"
+                    type="text"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    :class="{ 'border-red-500': errors.firstName }"
+                  />
+                  <p v-if="errors.firstName" class="mt-1 text-sm text-red-600">
                     {{ errors.firstName }}
                   </p>
                 </div>
-
-                <div class="sm:col-span-3">
-                  <label for="last-name" class="block text-sm font-medium text-gray-700">Nom</label>
-                  <div class="mt-1">
-                    <input
-                      type="text"
-                      id="last-name"
-                      v-model="form.lastName"
-                      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      :class="{ 'border-red-300': errors.lastName }"
-                    />
-                  </div>
-                  <p v-if="errors.lastName" class="mt-2 text-sm text-red-600">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                  <input
+                    v-model="form.lastName"
+                    type="text"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    :class="{ 'border-red-500': errors.lastName }"
+                  />
+                  <p v-if="errors.lastName" class="mt-1 text-sm text-red-600">
                     {{ errors.lastName }}
                   </p>
                 </div>
-
-                <div class="sm:col-span-4">
-                  <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                  <div class="mt-1">
-                    <input
-                      type="email"
-                      id="email"
-                      v-model="form.email"
-                      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      :class="{ 'border-red-300': errors.email }"
-                    />
-                  </div>
-                  <p v-if="errors.email" class="mt-2 text-sm text-red-600">{{ errors.email }}</p>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    v-model="form.email"
+                    type="email"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    :class="{ 'border-red-500': errors.email }"
+                  />
+                  <p v-if="errors.email" class="mt-1 text-sm text-red-600">{{ errors.email }}</p>
                 </div>
-
-                <div class="sm:col-span-2">
-                  <label for="phone" class="block text-sm font-medium text-gray-700"
-                    >Téléphone</label
-                  >
-                  <div class="mt-1">
-                    <input
-                      type="tel"
-                      id="phone"
-                      v-model="form.phone"
-                      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      :class="{ 'border-red-300': errors.phone }"
-                    />
-                  </div>
-                  <p v-if="errors.phone" class="mt-2 text-sm text-red-600">{{ errors.phone }}</p>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                  <input
+                    v-model="form.phone"
+                    type="tel"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    :class="{ 'border-red-500': errors.phone }"
+                  />
+                  <p v-if="errors.phone" class="mt-1 text-sm text-red-600">{{ errors.phone }}</p>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Dates et nombre de personnes -->
-          <div class="bg-white shadow sm:rounded-lg">
-            <div class="px-4 py-5 sm:p-6">
-              <h3 class="text-lg leading-6 font-medium text-gray-900">
-                Dates et nombre de personnes
-              </h3>
-              <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                <div class="sm:col-span-3">
-                  <label for="start-date" class="block text-sm font-medium text-gray-700"
-                    >Date de départ</label
-                  >
-                  <div class="mt-1">
-                    <input
-                      type="date"
-                      id="start-date"
-                      v-model="form.startDate"
-                      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      :class="{ 'border-red-300': errors.startDate }"
-                    />
-                  </div>
-                  <p v-if="errors.startDate" class="mt-2 text-sm text-red-600">
+            <!-- Travel Dates -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+              <h2 class="text-2xl font-semibold mb-4">Dates de voyage</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Date de départ</label>
+                  <input
+                    v-model="form.startDate"
+                    type="date"
+                    required
+                    :min="minDate"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    :class="{ 'border-red-500': errors.startDate }"
+                  />
+                  <p v-if="errors.startDate" class="mt-1 text-sm text-red-600">
                     {{ errors.startDate }}
                   </p>
                 </div>
-
-                <div class="sm:col-span-3">
-                  <label for="end-date" class="block text-sm font-medium text-gray-700"
-                    >Date de retour</label
-                  >
-                  <div class="mt-1">
-                    <input
-                      type="date"
-                      id="end-date"
-                      v-model="form.endDate"
-                      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      :class="{ 'border-red-300': errors.endDate }"
-                    />
-                  </div>
-                  <p v-if="errors.endDate" class="mt-2 text-sm text-red-600">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Date de retour</label>
+                  <input
+                    v-model="form.endDate"
+                    type="date"
+                    required
+                    :min="form.startDate"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    :class="{ 'border-red-500': errors.endDate }"
+                  />
+                  <p v-if="errors.endDate" class="mt-1 text-sm text-red-600">
                     {{ errors.endDate }}
                   </p>
                 </div>
+              </div>
+            </div>
 
-                <div class="sm:col-span-3">
-                  <label for="adults" class="block text-sm font-medium text-gray-700"
-                    >Nombre d'adultes</label
-                  >
-                  <div class="mt-1">
-                    <input
-                      type="number"
-                      id="adults"
-                      v-model="form.adults"
-                      min="1"
-                      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      :class="{ 'border-red-300': errors.adults }"
-                    />
-                  </div>
-                  <p v-if="errors.adults" class="mt-2 text-sm text-red-600">{{ errors.adults }}</p>
+            <!-- Number of Travelers -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+              <h2 class="text-2xl font-semibold mb-4">Nombre de voyageurs</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Adultes</label>
+                  <input
+                    v-model.number="form.adults"
+                    type="number"
+                    min="1"
+                    max="10"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    :class="{ 'border-red-500': errors.adults }"
+                  />
+                  <p v-if="errors.adults" class="mt-1 text-sm text-red-600">{{ errors.adults }}</p>
                 </div>
-
-                <div class="sm:col-span-3">
-                  <label for="children" class="block text-sm font-medium text-gray-700"
-                    >Nombre d'enfants</label
-                  >
-                  <div class="mt-1">
-                    <input
-                      type="number"
-                      id="children"
-                      v-model="form.children"
-                      min="0"
-                      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      :class="{ 'border-red-300': errors.children }"
-                    />
-                  </div>
-                  <p v-if="errors.children" class="mt-2 text-sm text-red-600">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Enfants</label>
+                  <input
+                    v-model.number="form.children"
+                    type="number"
+                    min="0"
+                    max="10"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    :class="{ 'border-red-500': errors.children }"
+                  />
+                  <p v-if="errors.children" class="mt-1 text-sm text-red-600">
                     {{ errors.children }}
                   </p>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Options supplémentaires -->
-          <div class="bg-white shadow sm:rounded-lg">
-            <div class="px-4 py-5 sm:p-6">
-              <h3 class="text-lg leading-6 font-medium text-gray-900">Options supplémentaires</h3>
-              <div class="mt-6 space-y-4">
+            <!-- Additional Options -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+              <h2 class="text-2xl font-semibold mb-4">Options supplémentaires</h2>
+              <div class="space-y-4">
                 <div class="flex items-start">
                   <div class="flex items-center h-5">
                     <input
-                      id="insurance"
                       v-model="form.insurance"
                       type="checkbox"
-                      class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                      class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                     />
                   </div>
-                  <div class="ml-3 text-sm">
-                    <label for="insurance" class="font-medium text-gray-700"
-                      >Assurance voyage</label
-                    >
-                    <p class="text-gray-500">
-                      Protection complète pendant votre séjour (+49€/personne)
+                  <div class="ml-3">
+                    <label class="text-sm font-medium text-gray-700">Assurance voyage</label>
+                    <p class="text-sm text-gray-500">
+                      49€ par personne - Couverture complète pendant votre séjour
                     </p>
                   </div>
                 </div>
-
                 <div class="flex items-start">
                   <div class="flex items-center h-5">
                     <input
-                      id="transfer"
                       v-model="form.transfer"
                       type="checkbox"
-                      class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                      class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                     />
                   </div>
-                  <div class="ml-3 text-sm">
-                    <label for="transfer" class="font-medium text-gray-700"
-                      >Transfert aéroport</label
-                    >
-                    <p class="text-gray-500">
-                      Service de transfert privé depuis l'aéroport (+29€/trajet)
-                    </p>
+                  <div class="ml-3">
+                    <label class="text-sm font-medium text-gray-700">Transfert aéroport</label>
+                    <p class="text-sm text-gray-500">29€ par trajet - Service de navette privée</p>
+                  </div>
+                </div>
+                <div class="flex items-start">
+                  <div class="flex items-center h-5">
+                    <input
+                      v-model="form.guide"
+                      type="checkbox"
+                      class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                    />
+                  </div>
+                  <div class="ml-3">
+                    <label class="text-sm font-medium text-gray-700">Guide touristique</label>
+                    <p class="text-sm text-gray-500">99€ par jour - Guide francophone privé</p>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Récapitulatif et paiement -->
-          <div class="bg-white shadow sm:rounded-lg">
-            <div class="px-4 py-5 sm:p-6">
-              <h3 class="text-lg leading-6 font-medium text-gray-900">Récapitulatif</h3>
-              <div class="mt-6">
-                <dl class="divide-y divide-gray-200">
-                  <div class="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                    <dt class="text-sm font-medium text-gray-500">Destination</dt>
-                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      {{ destination?.name }}, {{ destination?.country }}
-                    </dd>
-                  </div>
-                  <div class="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                    <dt class="text-sm font-medium text-gray-500">Prix de base</dt>
-                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      {{ destination?.price }}€ par personne
-                    </dd>
-                  </div>
-                  <div class="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                    <dt class="text-sm font-medium text-gray-500">Options</dt>
-                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      <ul class="border border-gray-200 rounded-md divide-y divide-gray-200">
-                        <li
-                          v-if="form.insurance"
-                          class="pl-3 pr-4 py-3 flex items-center justify-between text-sm"
-                        >
-                          <div class="w-0 flex-1 flex items-center">
-                            <span class="ml-2 flex-1 w-0 truncate">Assurance voyage</span>
-                          </div>
-                          <div class="ml-4 flex-shrink-0">{{ insurancePrice }}€</div>
-                        </li>
-                        <li
-                          v-if="form.transfer"
-                          class="pl-3 pr-4 py-3 flex items-center justify-between text-sm"
-                        >
-                          <div class="w-0 flex-1 flex items-center">
-                            <span class="ml-2 flex-1 w-0 truncate">Transfert aéroport</span>
-                          </div>
-                          <div class="ml-4 flex-shrink-0">{{ transferPrice }}€</div>
-                        </li>
-                      </ul>
-                    </dd>
-                  </div>
-                  <div class="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                    <dt class="text-sm font-medium text-gray-500">Total</dt>
-                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      {{ totalPrice }}€
-                    </dd>
-                  </div>
-                </dl>
+            <!-- Submit Button -->
+            <div class="flex justify-end">
+              <button
+                type="submit"
+                class="bg-primary text-white px-6 py-3 rounded-md hover:bg-primary-dark transition-colors duration-200"
+                :disabled="isSubmitting"
+              >
+                <span v-if="isSubmitting">Traitement en cours...</span>
+                <span v-else>Confirmer la réservation</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+            <h2 class="text-2xl font-semibold mb-4">Récapitulatif</h2>
+
+            <!-- Destination Info -->
+            <div class="mb-6">
+              <h3 class="text-lg font-medium text-gray-900">
+                {{ currentDestination?.name }}, {{ currentDestination?.country }}
+              </h3>
+              <div class="mt-2 flex items-center">
+                <div class="flex items-center">
+                  <svg
+                    v-for="i in 5"
+                    :key="i"
+                    class="h-5 w-5"
+                    :class="
+                      i <= Math.floor(currentDestination?.rating || 0)
+                        ? 'text-yellow-400'
+                        : 'text-gray-300'
+                    "
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                    />
+                  </svg>
+                </div>
+                <span class="ml-2 text-sm text-gray-500"
+                  >({{ currentDestination?.reviews }} avis)</span
+                >
+              </div>
+            </div>
+
+            <!-- Price Breakdown -->
+            <div class="space-y-4">
+              <div class="flex justify-between">
+                <span class="text-gray-600">Prix de base</span>
+                <span class="font-medium">{{ basePrice }}€</span>
+              </div>
+              <div v-if="form.insurance" class="flex justify-between">
+                <span class="text-gray-600">Assurance voyage</span>
+                <span class="font-medium">{{ insurancePrice }}€</span>
+              </div>
+              <div v-if="form.transfer" class="flex justify-between">
+                <span class="text-gray-600">Transfert aéroport</span>
+                <span class="font-medium">{{ transferPrice }}€</span>
+              </div>
+              <div v-if="form.guide" class="flex justify-between">
+                <span class="text-gray-600">Guide touristique</span>
+                <span class="font-medium">{{ guidePrice }}€</span>
+              </div>
+              <div class="border-t border-gray-200 pt-4">
+                <div class="flex justify-between">
+                  <span class="text-lg font-semibold">Total</span>
+                  <span class="text-lg font-semibold text-primary">{{ totalPrice }}€</span>
+                </div>
               </div>
             </div>
           </div>
-
-          <div class="pt-5">
-            <div class="flex justify-end">
-              <button
-                type="button"
-                @click="$router.push('/destinations')"
-                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Annuler
-              </button>
-              <button
-                type="submit"
-                :disabled="isLoading"
-                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
-              >
-                <svg
-                  v-if="isLoading"
-                  class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                {{ isLoading ? 'Traitement en cours...' : 'Confirmer la réservation' }}
-              </button>
-            </div>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-
-interface Destination {
-  id: number
-  name: string
-  country: string
-  price: number
-}
+import { useBookingStore, type BookingForm } from '@/stores/booking'
 
 const route = useRoute()
 const router = useRouter()
-const isLoading = ref(false)
-const destination = ref<Destination | null>(null)
+const bookingStore = useBookingStore()
 
-const form = reactive({
+// Form state
+const form = ref<BookingForm>({
   firstName: '',
   lastName: '',
   email: '',
@@ -335,129 +318,148 @@ const form = reactive({
   children: 0,
   insurance: false,
   transfer: false,
+  guide: false,
+  destinationId: Number(route.params.id) || 0,
 })
 
-const errors = reactive({
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  startDate: '',
-  endDate: '',
-  adults: '',
-  children: '',
+// Form validation
+const errors = ref<Record<string, string>>({})
+const isSubmitting = ref(false)
+
+// Computed properties
+const currentDestination = computed(() => bookingStore.currentDestination)
+const isLoading = computed(() => bookingStore.isLoading)
+const error = computed(() => bookingStore.error)
+
+const minDate = computed(() => {
+  const today = new Date()
+  return today.toISOString().split('T')[0]
 })
 
-// Prix des options
+const basePrice = computed(() => {
+  if (!currentDestination.value) return 0
+  return currentDestination.value.price * (form.value.adults + form.value.children)
+})
+
 const insurancePrice = computed(() => {
-  if (!form.insurance) return 0
-  return 49 * (form.adults + form.children)
+  return form.value.insurance ? 49 * (form.value.adults + form.value.children) : 0
 })
 
 const transferPrice = computed(() => {
-  if (!form.transfer) return 0
-  return 29 * 2 // Aller-retour
+  return form.value.transfer ? 29 * 2 : 0 // Aller-retour
+})
+
+const guidePrice = computed(() => {
+  return form.value.guide ? 99 : 0
 })
 
 const totalPrice = computed(() => {
-  if (!destination.value) return 0
-  const basePrice = destination.value.price * (form.adults + form.children)
-  return basePrice + insurancePrice.value + transferPrice.value
+  return basePrice.value + insurancePrice.value + transferPrice.value + guidePrice.value
 })
 
+// Methods
 const validateForm = () => {
-  let isValid = true
-  errors.firstName = ''
-  errors.lastName = ''
-  errors.email = ''
-  errors.phone = ''
-  errors.startDate = ''
-  errors.endDate = ''
-  errors.adults = ''
-  errors.children = ''
+  errors.value = {}
 
-  if (!form.firstName) {
-    errors.firstName = 'Le prénom est requis'
-    isValid = false
+  if (!form.value.firstName) {
+    errors.value.firstName = 'Le prénom est requis'
   }
 
-  if (!form.lastName) {
-    errors.lastName = 'Le nom est requis'
-    isValid = false
+  if (!form.value.lastName) {
+    errors.value.lastName = 'Le nom est requis'
   }
 
-  if (!form.email) {
-    errors.email = "L'email est requis"
-    isValid = false
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = "L'email n'est pas valide"
-    isValid = false
+  if (!form.value.email) {
+    errors.value.email = "L'email est requis"
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.value.email = "L'email n'est pas valide"
   }
 
-  if (!form.phone) {
-    errors.phone = 'Le numéro de téléphone est requis'
-    isValid = false
+  if (!form.value.phone) {
+    errors.value.phone = 'Le numéro de téléphone est requis'
   }
 
-  if (!form.startDate) {
-    errors.startDate = 'La date de départ est requise'
-    isValid = false
+  if (!form.value.startDate) {
+    errors.value.startDate = 'La date de départ est requise'
   }
 
-  if (!form.endDate) {
-    errors.endDate = 'La date de retour est requise'
-    isValid = false
-  } else if (form.startDate && form.endDate && new Date(form.endDate) <= new Date(form.startDate)) {
-    errors.endDate = 'La date de retour doit être postérieure à la date de départ'
-    isValid = false
+  if (!form.value.endDate) {
+    errors.value.endDate = 'La date de retour est requise'
+  } else if (form.value.startDate && form.value.endDate < form.value.startDate) {
+    errors.value.endDate = 'La date de retour doit être postérieure à la date de départ'
   }
 
-  if (form.adults < 1) {
-    errors.adults = 'Au moins un adulte est requis'
-    isValid = false
+  if (!form.value.adults || form.value.adults < 1) {
+    errors.value.adults = 'Au moins un adulte est requis'
   }
 
-  if (form.children < 0) {
-    errors.children = "Le nombre d'enfants ne peut pas être négatif"
-    isValid = false
+  if (form.value.children < 0) {
+    errors.value.children = "Le nombre d'enfants ne peut pas être négatif"
   }
 
-  return isValid
+  return Object.keys(errors.value).length === 0
 }
 
 const handleSubmit = async () => {
-  if (!validateForm()) {
-    return
-  }
+  if (!validateForm()) return
 
-  isLoading.value = true
+  isSubmitting.value = true
 
   try {
-    // TODO: Implémenter la logique de réservation avec l'API
-    // Simuler un délai de réponse
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    // Rediriger vers la page de confirmation
-    router.push({
-      name: 'booking-confirmation',
-      params: { id: destination.value?.id },
-    })
-  } catch (error) {
-    // Gérer les erreurs de réservation
-    console.error('Erreur lors de la réservation:', error)
+    const response = await bookingStore.submitBooking(form.value)
+    if (response) {
+      router.push({
+        name: 'booking-confirmation',
+        params: { id: response.id },
+      })
+    }
+  } catch (err) {
+    console.error('Erreur lors de la soumission du formulaire:', err)
   } finally {
-    isLoading.value = false
+    isSubmitting.value = false
   }
 }
 
+// Lifecycle hooks
 onMounted(async () => {
-  // TODO: Récupérer les détails de la destination depuis l'API
-  // Pour l'instant, on utilise des données de test
-  destination.value = {
-    id: Number(route.params.id),
-    name: 'Paris',
-    country: 'France',
-    price: 599,
+  if (form.value.destinationId) {
+    await bookingStore.fetchDestinationById(form.value.destinationId)
   }
 })
 </script>
+
+<style scoped>
+.booking-page {
+  min-height: 100vh;
+  background-color: #f3f4f6;
+}
+
+.hero-section {
+  height: 400px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
+  display: flex;
+  align-items: center;
+}
+
+/* Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
