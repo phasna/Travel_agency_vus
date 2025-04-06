@@ -3,24 +3,49 @@
     <!-- Hero section avec slider -->
     <div class="relative h-[80vh]">
       <div class="absolute inset-0">
-        <img
-          class="w-full h-full object-cover"
-          src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2850&q=80"
-          alt="Nature"
-        />
+        <transition-group name="fade">
+          <img
+            v-for="(slide, index) in slides"
+            :key="slide.id"
+            v-show="currentSlide === index"
+            :src="slide.image"
+            :alt="slide.title"
+            class="absolute inset-0 w-full h-full object-cover"
+          />
+        </transition-group>
         <div
           class="absolute inset-0 bg-gradient-to-r from-gray-900 to-transparent opacity-75"
         ></div>
       </div>
       <div class="relative max-w-7xl mx-auto h-full flex items-center px-4 sm:px-6 lg:px-8">
         <div class="max-w-2xl">
-          <h1 class="text-5xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl">
-            Découvrez le monde avec nous
-          </h1>
-          <p class="mt-6 text-xl text-gray-300">
-            Explorez des destinations incroyables, créez des souvenirs inoubliables et laissez-nous
-            vous guider dans vos aventures.
-          </p>
+          <transition-group name="fade">
+            <div v-show="currentSlide === 0" key="slide1">
+              <h1 class="text-5xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl">
+                Découvrez le monde avec nous
+              </h1>
+              <p class="mt-6 text-xl text-gray-300">
+                Explorez des destinations incroyables, créez des souvenirs inoubliables et
+                laissez-nous vous guider dans vos aventures.
+              </p>
+            </div>
+            <div v-show="currentSlide === 1" key="slide2">
+              <h1 class="text-5xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl">
+                Des expériences uniques
+              </h1>
+              <p class="mt-6 text-xl text-gray-300">
+                Des voyages sur mesure pour des moments inoubliables en famille ou entre amis.
+              </p>
+            </div>
+            <div v-show="currentSlide === 2" key="slide3">
+              <h1 class="text-5xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl">
+                Des offres exceptionnelles
+              </h1>
+              <p class="mt-6 text-xl text-gray-300">
+                Profitez de nos meilleures offres pour vos prochaines vacances.
+              </p>
+            </div>
+          </transition-group>
           <div class="mt-10 flex space-x-4">
             <router-link
               to="/destinations"
@@ -37,42 +62,59 @@
           </div>
         </div>
       </div>
+      <!-- Contrôles du slider -->
+      <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        <button
+          v-for="(slide, index) in slides"
+          :key="slide.id"
+          @click="currentSlide = index"
+          class="w-3 h-3 rounded-full"
+          :class="currentSlide === index ? 'bg-white' : 'bg-white/50'"
+        ></button>
+      </div>
     </div>
 
     <!-- Barre de recherche -->
     <div class="relative -mt-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="bg-white rounded-lg shadow-xl p-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form @submit.prevent="handleSearch" class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700">Destination</label>
             <input
+              v-model="searchForm.destination"
               type="text"
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
               placeholder="Où voulez-vous aller ?"
+              required
             />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700">Date de départ</label>
             <input
+              v-model="searchForm.departureDate"
               type="date"
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+              required
             />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700">Date de retour</label>
             <input
+              v-model="searchForm.returnDate"
               type="date"
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+              required
             />
           </div>
           <div class="flex items-end">
             <button
+              type="submit"
               class="w-full bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 transition duration-300"
             >
               Rechercher
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
 
@@ -264,16 +306,18 @@
           </p>
         </div>
         <div class="mt-8 lg:mt-0 lg:ml-8">
-          <form class="sm:flex">
+          <form @submit.prevent="handleNewsletterSubmit" class="sm:flex">
             <label for="email-address" class="sr-only">Adresse email</label>
             <input
               id="email-address"
+              v-model="newsletterEmail"
               name="email"
               type="email"
               autocomplete="email"
               required
               class="w-full px-5 py-3 border border-transparent placeholder-gray-500 focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary-600 focus:ring-white focus:border-white sm:max-w-xs rounded-md"
               placeholder="Entrez votre email"
+              :class="{ 'border-red-500': newsletterError }"
             />
             <div class="mt-3 rounded-md sm:mt-0 sm:ml-3 sm:flex-shrink-0">
               <button
@@ -284,6 +328,10 @@
               </button>
             </div>
           </form>
+          <p v-if="newsletterError" class="mt-2 text-sm text-red-300">{{ newsletterError }}</p>
+          <p v-if="newsletterSuccess" class="mt-2 text-sm text-green-300">
+            {{ newsletterSuccess }}
+          </p>
         </div>
       </div>
     </div>
@@ -291,7 +339,109 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+// Slider
+const slides = ref([
+  {
+    id: 1,
+    image:
+      'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2850&q=80',
+    title: 'Nature',
+  },
+  {
+    id: 2,
+    image:
+      'https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-1.2.1&auto=format&fit=crop&w=2850&q=80',
+    title: 'Plage',
+  },
+  {
+    id: 3,
+    image:
+      'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=2850&q=80',
+    title: 'Montagne',
+  },
+])
+
+const currentSlide = ref(0)
+let slideInterval: number | null = null
+
+const startSlideShow = () => {
+  slideInterval = window.setInterval(() => {
+    currentSlide.value = (currentSlide.value + 1) % slides.value.length
+  }, 5000)
+}
+
+onMounted(() => {
+  startSlideShow()
+})
+
+onUnmounted(() => {
+  if (slideInterval) {
+    clearInterval(slideInterval)
+  }
+})
+
+// Formulaire de recherche
+const searchForm = ref({
+  destination: '',
+  departureDate: '',
+  returnDate: '',
+})
+
+const handleSearch = () => {
+  // Validation des dates
+  const departure = new Date(searchForm.value.departureDate)
+  const return_ = new Date(searchForm.value.returnDate)
+
+  if (return_ < departure) {
+    alert('La date de retour doit être postérieure à la date de départ')
+    return
+  }
+
+  // Redirection vers la page de résultats avec les paramètres
+  router.push({
+    path: '/search',
+    query: {
+      destination: searchForm.value.destination,
+      departureDate: searchForm.value.departureDate,
+      returnDate: searchForm.value.returnDate,
+    },
+  })
+}
+
+// Newsletter
+const newsletterEmail = ref('')
+const newsletterError = ref('')
+const newsletterSuccess = ref('')
+
+const handleNewsletterSubmit = async () => {
+  try {
+    // Validation de l'email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(newsletterEmail.value)) {
+      newsletterError.value = 'Veuillez entrer une adresse email valide'
+      return
+    }
+
+    // Simulation d'un appel API
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    newsletterSuccess.value = 'Merci de votre inscription !'
+    newsletterError.value = ''
+    newsletterEmail.value = ''
+
+    // Réinitialiser le message de succès après 3 secondes
+    setTimeout(() => {
+      newsletterSuccess.value = ''
+    }, 3000)
+  } catch (error) {
+    newsletterError.value = 'Une erreur est survenue. Veuillez réessayer.'
+  }
+}
 
 const featuredDestinations = ref([
   {
@@ -358,3 +508,15 @@ const testimonials = ref([
   },
 ])
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
