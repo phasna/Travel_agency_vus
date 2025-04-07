@@ -1,15 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-import Login from '../views/Login.vue'
-import Register from '../views/Register.vue'
-import Destinations from '../views/Destinations.vue'
-import Booking from '../views/Booking.vue'
-import BookingConfirmation from '../views/BookingConfirmation.vue'
-import Circuits from '../views/Circuits.vue'
-import Sejours from '../views/Sejours.vue'
-import Croisieres from '../views/Croisieres.vue'
-import Services from '../views/Services.vue'
-import Contact from '../views/Contact.vue'
+import Home from '../views/destinations/Home.vue'
+import Login from '../views/auth/Login.vue'
+import Register from '../views/auth/Register.vue'
+import Destinations from '../views/destinations/Destinations.vue'
+import DestinationDetails from '../views/destinations/DestinationDetails.vue'
+import Booking from '../views/booking/Booking.vue'
+import BookingConfirmation from '../views/booking/BookingConfirmation.vue'
+import Circuits from '../views/destinations/Circuits.vue'
+import CircuitDetails from '../views/destinations/CircuitDetails.vue'
+import Sejours from '../views/destinations/Sejours.vue'
+import Croisieres from '../views/destinations/Croisieres.vue'
+import Services from '../views/common/Services.vue'
+import Contact from '../views/common/Contact.vue'
 
 const routes = [
   {
@@ -21,6 +23,11 @@ const routes = [
     path: '/circuits',
     name: 'Circuits',
     component: Circuits,
+  },
+  {
+    path: '/circuits/:id',
+    name: 'circuit-details',
+    component: CircuitDetails,
   },
   {
     path: '/sejours',
@@ -58,6 +65,11 @@ const routes = [
     component: Destinations,
   },
   {
+    path: '/destinations/:id',
+    name: 'destination-details',
+    component: DestinationDetails,
+  },
+  {
     path: '/booking/:id',
     name: 'booking',
     component: Booking,
@@ -76,7 +88,7 @@ const router = createRouter({
 
 // Navigation guard pour vérifier l'authentification
 router.beforeEach((to, from, next) => {
-  const publicPages = ['/login', '/register', '/', '/destinations']
+  const publicPages = ['/login', '/register', '/', '/destinations', '/destinations/:id']
   const authRequired = !publicPages.includes(to.path)
   const isAuthenticated = localStorage.getItem('token') // Vérifier si l'utilisateur est connecté
 

@@ -111,7 +111,7 @@
                 >
               </div>
               <div class="flex items-center space-x-2">
-                <span class="text-sm text-gray-500">{{ circuit.duration }} jours</span>
+                <span class="text-sm text-gray-500">{{ circuit.duration }}</span>
                 <router-link
                   :to="'/circuits/' + circuit.id"
                   class="text-primary-600 hover:text-primary-700 font-medium"
@@ -134,24 +134,103 @@ const circuits = ref([
   {
     id: 1,
     name: "Tour d'Europe",
-    description: 'Découvrez les plus belles capitales européennes en 15 jours',
+    description:
+      'Un voyage inoubliable à travers les plus belles capitales européennes. De Paris à Rome, en passant par Berlin et Prague, découvrez la richesse culturelle et historique du Vieux Continent.',
     price: 2499,
-    duration: 15,
+    duration: '15 jours',
     rating: 4.8,
     reviews: 156,
     image:
       'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+    highlights: [
+      'Visite de la Tour Eiffel et du Louvre à Paris',
+      'Découverte de la Porte de Brandebourg à Berlin',
+      'Exploration du Pont Charles à Prague',
+      'Visite du Colisée et du Vatican à Rome',
+      'Balade en gondole à Venise',
+    ],
+    itinerary: [
+      "Arrivée à Paris, installation à l'hôtel et visite du quartier Montmartre",
+      'Visite guidée de Paris : Tour Eiffel, Champs-Élysées, Arc de Triomphe',
+      'Journée au Louvre et croisière sur la Seine',
+      'Train pour Berlin, visite de la East Side Gallery',
+      "Découverte de l'histoire de Berlin : Checkpoint Charlie, Reichstag",
+      'Train pour Prague, visite de la vieille ville',
+      'Exploration du château de Prague et du quartier juif',
+      'Train pour Vienne, visite du palais de Schönbrunn',
+      "Découverte de l'Opéra et du centre historique de Vienne",
+      'Train pour Venise, balade en gondole',
+      'Visite de la place Saint-Marc et du Palais des Doges',
+      'Train pour Rome, visite du Colisée',
+      'Découverte du Forum romain et du Panthéon',
+      'Visite du Vatican et de la chapelle Sixtine',
+      'Départ de Rome',
+    ],
+    includes: [
+      'Vols internationaux',
+      'Hébergement en hôtels 3-4 étoiles',
+      'Petits-déjeuners',
+      'Passes de train entre les villes',
+      'Visites guidées dans chaque ville',
+      'Entrées aux principaux monuments',
+    ],
+    excludes: [
+      'Déjeuners et dîners',
+      'Assurance voyage',
+      'Dépenses personnelles',
+      'Pourboires aux guides',
+    ],
   },
   {
     id: 2,
     name: 'Route de la Soie',
-    description: "Un voyage culturel à travers l'Asie centrale",
+    description:
+      "Un voyage extraordinaire sur les traces des anciennes caravanes, à travers l'Asie centrale. De Xi'an à Samarcande, découvrez des cités millénaires et des paysages à couper le souffle.",
     price: 3299,
-    duration: 21,
+    duration: '21 jours',
     rating: 4.9,
     reviews: 89,
     image:
       'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+    highlights: [
+      "Visite de l'armée de terre cuite à Xi'an",
+      'Traversée du désert de Gobi',
+      'Découverte des grottes de Mogao',
+      'Exploration du bazar de Kashgar',
+      'Visite de la place du Régistan à Samarcande',
+    ],
+    itinerary: [
+      "Arrivée à Xi'an, installation et visite du quartier musulman",
+      "Découverte de l'armée de terre cuite",
+      "Visite de la Grande Mosquée et des remparts de Xi'an",
+      'Vol pour Dunhuang, visite du marché de nuit',
+      'Exploration des grottes de Mogao',
+      'Randonnée dans les dunes de Mingsha',
+      'Train pour Turpan, visite des ruines de Jiaohe',
+      "Découverte du système d'irrigation Karez",
+      'Route vers Kashgar',
+      'Exploration du grand bazar de Kashgar',
+      'Vol pour Tashkent, visite de la ville',
+      'Train pour Samarcande',
+      'Découverte de la place du Régistan',
+      'Visite de la nécropole de Shah-i-Zinda',
+      'Route vers Boukhara',
+      'Exploration de la citadelle de Boukhara',
+      'Visite du complexe Po-i-Kalyan',
+      'Route vers Khiva',
+      'Découverte de la ville fortifiée de Khiva',
+      'Dernière journée à Khiva',
+      'Départ',
+    ],
+    includes: [
+      'Vols internationaux et domestiques',
+      "Hébergement en hôtels et maisons d'hôtes",
+      'Pension complète',
+      'Transport en 4x4 privé',
+      'Guide francophone',
+      'Entrées aux sites',
+    ],
+    excludes: ['Visa pour certains pays', 'Assurance voyage', 'Boissons', 'Dépenses personnelles'],
   },
   {
     id: 3,

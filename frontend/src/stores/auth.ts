@@ -1,126 +1,68 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import { ref } from 'vue'
+import type { User } from '@/types'
+import { authService } from '@/services/api'
 
-interface User {
-  id: number
-  name: string
-  email: string
-}
+export const useAuthStore = defineStore('auth', () => {
+  const user = ref<User | null>(null)
+  const isAuthenticated = ref(false)
+  const loading = ref(false)
+  const error = ref<string | null>(null)
 
-interface AuthState {
-  user: User | null
-  token: string | null
-  isAuthenticated: boolean
-  loading: boolean
-  error: string | null
-}
+  const login = async (email: string, password: string) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await authService.login(email, password)
+      user.value = response.user
+      isAuthenticated.value = true
+      localStorage.setItem('token', response.token)
+    } catch (err) {
+      error.value = 'Erreur de connexion. Veuillez vérifier vos identifiants.'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
 
-export const useAuthStore = defineStore('auth', {
-  state: (): AuthState => ({
-    user: null,
-    token: localStorage.getItem('token'),
-    isAuthenticated: !!localStorage.getItem('token'),
-    loading: false,
-    error: null,
-  }),
+  const register = async (userData: Partial<User>) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await authService.register(userData)
+      user.value = response.user
+      isAuthenticated.value = true
+      localStorage.setItem('token', response.token)
+    } catch (err) {
+      error.value = "Erreur lors de l'inscription. Veuillez réessayer."
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
 
-  getters: {
-    getUser: (state) => state.user,
-    getToken: (state) => state.token,
-    getIsAuthenticated: (state) => state.isAuthenticated,
-    getLoading: (state) => state.loading,
-    getError: (state) => state.error,
-  },
+  const logout = () => {
+    authService.logout()
+    user.value = null
+    isAuthenticated.value = false
+  }
 
-  actions: {
-    async login(email: string, password: string) {
-      this.loading = true
-      this.error = null
-      try {
-        const response = await axios.post('/api/login', { email, password })
-        const { token, user } = response.data
-        this.token = token
-        this.user = user
-        this.isAuthenticated = true
-        localStorage.setItem('token', token)
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-        return true
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Une erreur est survenue lors de la connexion'
-        return false
-      } finally {
-        this.loading = false
-      }
-    },
+  const checkAuth = () => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      isAuthenticated.value = true
+      // TODO: Vérifier le token et récupérer les informations de l'utilisateur
+    }
+  }
 
-    async register(name: string, email: string, password: string, password_confirmation: string) {
-      this.loading = true
-      this.error = null
-      try {
-        const response = await axios.post('/api/register', {
-          name,
-          email,
-          password,
-          password_confirmation,
-        })
-        const { token, user } = response.data
-        this.token = token
-        this.user = user
-        this.isAuthenticated = true
-        localStorage.setItem('token', token)
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-        return true
-      } catch (error: any) {
-        this.error =
-          error.response?.data?.message || "Une erreur est survenue lors de l'inscription"
-        return false
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async logout() {
-      try {
-        await axios.post('/api/logout')
-      } catch (error) {
-        console.error('Erreur lors de la déconnexion:', error)
-      } finally {
-        this.token = null
-        this.user = null
-        this.isAuthenticated = false
-        localStorage.removeItem('token')
-        delete axios.defaults.headers.common['Authorization']
-      }
-    },
-
-    async fetchUser() {
-      if (!this.token) return
-
-      this.loading = true
-      this.error = null
-      try {
-        const response = await axios.get('/api/user')
-        this.user = response.data
-      } catch (error: any) {
-        this.error =
-          error.response?.data?.message ||
-          'Une erreur est survenue lors de la récupération des informations utilisateur'
-        if (error.response?.status === 401) {
-          this.logout()
-        }
-      } finally {
-        this.loading = false
-      }
-    },
-
-    initializeAuth() {
-      const token = localStorage.getItem('token')
-      if (token) {
-        this.token = token
-        this.isAuthenticated = true
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-        this.fetchUser()
-      }
-    },
-  },
+  return {
+    user,
+    isAuthenticated,
+    loading,
+    error,
+    login,
+    register,
+    logout,
+    checkAuth,
+  }
 })
